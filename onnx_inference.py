@@ -131,7 +131,7 @@ def standard_to_bgr(list_color_name):
         standard.append(from_colorname_to_bgr(list_color_name[i]))
     return standard
 
-compound_coef = 0
+compound_coef = 2
 force_input_size = None  # set None to use default size
 
 # replace this part with your project's anchor config
@@ -157,7 +157,7 @@ def display(name, preds, imgs, imshow=True, imwrite=False):
 
 # import onnxruntime
 
-ort_session = onnxruntime.InferenceSession("efficientdet-d0.onnx".format(compound_coef))
+ort_session = onnxruntime.InferenceSession("efficientdet-d{}.onnx".format(compound_coef))
 
 input_sizes = [512, 640, 768, 896, 1024, 1280, 1280, 1536]
 input_size = input_sizes[compound_coef] if force_input_size is None else force_input_size
@@ -172,7 +172,7 @@ with torch.no_grad():
     print('Test 2: model inferring and postprocessing with ONNX model')
     print('inferring image for 100 times...')
 
-    for i in tqdm(range(100)):
+    for i in tqdm(range(10)):
         #Preprocess
         t_start = time.time()
         ori_imgs, framed_imgs, framed_metas = preprocess(img_path, max_size=input_size)
@@ -183,7 +183,7 @@ with torch.no_grad():
 
         out = [{'rois': onnx_out[0], 'class_ids': onnx_out[1], 'scores': onnx_out[2]}]
         out = invert_affine(framed_metas, out)
-        display('out_onnx_'+img_path,out, ori_imgs, imshow=False, imwrite=True)
+        display(f'd{compound_coef}_out_onnx_'+img_path,out, ori_imgs, imshow=False, imwrite=True)
 
         t = time.time() - t_start
         onnx_times.append(t)
